@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroPython Web REPL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #output {
+            width: 80%;
+            height: 300px;
+            border: 1px solid #ccc;
+            overflow: auto;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        textarea {
+            width: 80%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MicroPython Web REPL</h1>
+    <button id="connect">Connect to board</button>
+    <div id="output"></div>
+    <textarea id="program" placeholder="Write your MicroPython program here..."></textarea>
+    <button id="run">Run</button>
+    <input type="text" id="input" placeholder="Enter command..." style="width: 70%;" disabled>
+<button id="printMain">Print main.py</button>
+
+    <script>
+        let port;
+        let reader;
+        let writer;
+        let inputField = document.getElementById('input');
+        let programArea = document.getElementById('program');
+        let outputDiv = document.getElementById('output');
+
+        document.getElementById("connect").addEventListener("click", async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+
+                writer = port.writable.getWriter();
+                reader = port.readable.getReader();
+
+                readLoop();
+
+                inputField.disabled = false;
+                outputDiv.textContent += 'Connected to MicroPython REPL. Type your commands or run a program!\n';
+            } catch (error) {
+                console.error("There was an error connecting to the device:", error);
+            }
+        });
+
+        document.getElementById("run").addEventListener("click", async () => {
+          const text =  programArea.value;
+          console.log(text);
+          await uploadStringToFile(text, "main.py");
+        });
+
+      async function uploadStringToFile(content, filename) {
+          const encoder = new TextEncoder();
+      
+          // Send command to open the file for writing on the MicroPython device
+          await writer.write(encoder.encode(`with open("${filename}", "w") as f:\r\n`));
+      
+          // Split the content by lines and send to MicroPython REPL
+          const lines = content.split('\n');
+          for (const line of lines) {
+              const data = encoder.encode(`    f.write("${line.replace(/"/g, '\"')}")\r\n`); // Escape double quotes and write each line
+              await writer.write(data);
+              await new Promise(resolve => setTimeout(resolve, 100));
+          }
+           writeMsg(`\r\n\r\n\r\n`);
+           await new Promise(resolve => setTimeout(resolve, 100));
+
+
+          writeMsg(`import os\r\n`); // Escape double quotes and write each line
+          await new Promise(resolve => setTimeout(resolve, 100));
+          writeMsg(`print(os.listdir())\r\n\r\n\r\n`);
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          writeMsg(`with open("main.py", "r") as f:`); // Escape double quotes and write each line
+          await new Promise(resolve => setTimeout(resolve, 100));
+          writeMsg(`  print(f.read())\r\n\r\n\r\n`);
+      }
+
+      async function writeMsg(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str); // Escape double quotes and write each line
+        await writer.write(data);
+      }
+
+        inputField.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(inputField.value + '\r\n');
+                await writer.write(data);
+                inputField.value = '';
+            }
+        });
+
+        async function readLoop() {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (value) {
+                    outputDiv.textContent += new TextDecoder().decode(value);
+                    outputDiv.scrollTop = outputDiv.scrollHeight;  // Auto-scroll to bottom
+                }
+                if (done) {
+                    reader.releaseLock();
+                    break;
+                }
+            }
+        }
+
+      async function printMainProgram() {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+    
+        // Command to open and read the main.py file
+        const command = `
+with open("main.py", "r") as f: 
+  print(f.read())
+
+
+
+
+`.trim();
+        // Send command to MicroPython
+        await writer.write(encoder.encode(command));
+    
+        // Read response and print
+        let done = false;
+        let output = "";
+    
+        while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            output += decoder.decode(value);
+            if (readerDone) {
+                done = true;
+            }
+        }
+    
+        console.log(output);  // This will print the content of main.py to the JavaScript console
+    }
+
+      document.getElementById("printMain").addEventListener("click", async () => {
+    await printMainProgram();
+});
+
+    </script>
+</body>
+</html>

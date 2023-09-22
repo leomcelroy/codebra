@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroPython Uploader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 80%;
+            height: 200px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MicroPython Uploader</h1>
+    <button id="connect">Connect to board</button>
+    <textarea id="micropython-code">
+from machine import Pin
+import time
+
+led = Pin(13, Pin.OUT)  # Use GPIO 13 for built-in LED
+
+while True:
+    led.value(not led.value())
+    time.sleep(1)
+    </textarea>
+    <button id="upload">Upload to board</button>
+
+    <script>
+        document.getElementById("connect").addEventListener("click", async () => {
+            let writableStream;
+            try {
+                const port = await navigator.serial.requestPort(); // Removed filter
+                await port.open({ baudRate: 115200 }); // Adjust baud rate if needed
+
+                writableStream = port.writable.getWriter();
+
+                document.getElementById("upload").addEventListener("click", async () => {
+                    const code = document.getElementById("micropython-code").value;
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(code);
+
+                    try {
+                        await writableStream.write(data);
+                        console.log("wrote", code);
+                    } catch (error) {
+                        console.error("There was an error writing to the device:", error);
+                    }
+                });
+            } catch (error) {
+                console.error("There was an error connecting to the device:", error);
+            }
+        });
+    </script>
+</body>
+</html>
