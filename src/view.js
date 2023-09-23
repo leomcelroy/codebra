@@ -13,6 +13,8 @@ export const view = (state) => {
             <div class="menu-item connect-trigger">connect${state.port === null ? "" : "-ed"}</div>
             <div class="menu-separator">o</div>
             <div class="menu-item download-trigger">download</div>
+            <div class="menu-separator">o</div>
+            <a href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2" class="menu-item">uf2</a>
         </div>
 
         <div class="bottom">
@@ -25,10 +27,7 @@ export const view = (state) => {
 
           <div class="right-side">
             <div class="log-output">
-              ${state.logs.map(x => html`<pre class="repl-log">${">>>  " + x}</pre>`)}
-            </div>
-            <div class="repl">
-              <input class="repl-input"/>
+              <pre>${state.logs}<input placeholder="" class="repl-input"/></pre>
             </div>
           </div>
 

@@ -28,6 +28,7 @@ html, body {
   border-radius: 5px;
   color: white;
   font-size: 1.2rem;
+  text-decoration: none;
 }
 
 .menu-item:hover {
@@ -120,28 +121,22 @@ svg {
 }
 
 .log-output {
-  padding-top: 10px;
   width: 100%;
   flex: 1;
   background: #e4e4e4;
   overflow: scroll;
-}
-
-.repl {
-  width: 100%;
-  height: 100px;
-  background: #c5c2c2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-top: 1px solid black;
+  height: 100%;
 }
 
 .repl-input {
   width: 90%;
-  height: 35px;
-  padding: 10px;
+  padding: 5px;
   box-sizing: border-box;
+  background: none;
+  border: none;
+  margin: 5px 0px;
+  border-bottom: 0.5px solid black;
+  font-family: monospace;
 }
 
 .separator {
@@ -159,9 +154,10 @@ svg {
   width: 10px;
 }
 
-.repl-log {
+.log-output pre {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0px 10px;
-  margin: 3px;
 }
 
 

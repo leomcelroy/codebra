@@ -43,13 +43,13 @@ export function addUpload(state) {
 
       let toWrite = "";
       // await writeMsg(`with open("${filename}", "w") as f:\r\n`);
-      toWrite += `f = open("${filename}", "w")\r\n`;
+      await writeMsg(`f = open("${filename}", "w")\r\n`);
       const lines = content.split('\n');
       for (const line of lines) {
-        toWrite += `f.write("${line.replace(/"/g, '\\"')}")\r\n`;
-          // await writeMsg(`  f.write("${line.replace(/"/g, '\\"')}")\r\n`);
+        // toWrite += `f.write("${line.replace(/"/g, '\\"')}")\n`;
+          await writeMsg(`f.write("${line.replace(/"/g, '\\"')}\\n")\r\n`);
       }
-      toWrite += `f.close()\r\n`;
+      await writeMsg(`f.close()\r\n`);
 
       await writeMsg(toWrite, 2000);
 

@@ -18,8 +18,9 @@ export function addConnect(state) {
             readLoop();
 
             state.port = port;
-            const msg = 'Connected to MicroPython REPL. Type your commands or run a program!'
-            state.logs.push(msg);
+            state.logs += `Connected to MicroPython REPL.\n`
+            state.logs += `Type your commands or run a program!\n`
+            state.logs += `\n>>> `
 
             state.actions.render();
         } catch (error) {
@@ -31,29 +32,15 @@ export function addConnect(state) {
     const outputDiv = document.querySelector(".log-output");
 
     async function readLoop() {
-        let soFar = [];
-
         try {
             while (true) {
                 const { reader } = state;
                 const { value, done } = await reader.read();
                 if (value) {
                     const log = new TextDecoder().decode(value);
-                    soFar.push(log);
-
-                    if (log.endsWith(">>> ") || /\.\.\.\s+$/.test(log)) {
-                        const str = soFar.join("")
-                        const arr = str.split("\r\n");
-                        if (log.endsWith(">>> ")) arr.pop();
-                        const last = arr.pop();
-
-                        if (arr.length > 0) state.logs.push(arr.join(""));
-                        state.logs.push(last);
-                        soFar = [];
-                        state.actions.render();
-
-                        outputDiv.scrollTop = outputDiv.scrollHeight;  // Auto-scroll to bottom
-                    }
+                    state.logs += log;
+                    state.actions.render();
+                    outputDiv.scrollTop = outputDiv.scrollHeight;
                 }
                 if (done) {
                     reader.releaseLock();

@@ -41,20 +41,10 @@ function upload(files, state) {
   reader.onloadend = event => {
     let text = reader.result;
 
-    if (extension === "js") {
+    if (extension === "py") {
       const end = cm.state.doc.toString().length;
       cm.dispatch({
         changes: { from: 0, to: end, insert: text }
-      });
-    } else if (extension === "svg") {
-      text = text.replaceAll("\n", "");
-
-      const newLines = 
-      `const ${name} = createTurtle();\n`
-      + `${name}.fromSVG(String.raw\`${text}\`);\n\n`
-
-      cm.dispatch({
-        changes: { from: 0, insert: newLines }
       });
     } else {
       throw Error("Unknown extension:", extension);
