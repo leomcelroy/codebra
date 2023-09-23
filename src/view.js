@@ -14,9 +14,9 @@ export const view = (state) => {
             <div class="menu-separator">o</div>
             <div class="menu-item download-trigger">download</div>
             <div class="menu-separator">o</div>
-            <a href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2" class="menu-item">uf2</a>
+            <a class="menu-item" href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">uf2</a>
             <div class="menu-separator">o</div>
-            <a href="https://github.com/leomcelroy/codebra">github</a>
+            <a class="menu-item" href="https://github.com/leomcelroy/codebra">github</a>
         </div>
 
         <div class="bottom">
