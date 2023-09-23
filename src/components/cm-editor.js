@@ -11,8 +11,8 @@ export function initCodeMirror(el) {
 
   const keybindings = keymap.of([indentWithTab]);
   const extensions = [
-    basicSetup, 
     python(),
+    basicSetup, 
     keybindings,
     indentUnit.of("  "),
   ]
