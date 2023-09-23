@@ -44,12 +44,6 @@ createComponent({
       height: 100%;
     }
 
-    .ͼd:hover {
-      background: lightgrey;
-      opacity: .5;
-      cursor: col-resize;
-    }
-
   `,
   onConnect: el => {
     const container = el.dom.querySelector(".editor");
