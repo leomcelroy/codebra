@@ -53,17 +53,7 @@ export function addConnect(state) {
             }
         }, 0);
 
-        // try {
-        //     while (true) {
-        //         const byte = state.port.read();
-        //         if (byte) {
-        //             const log = new TextDecoder().decode(byte);
-        //             state.logs += log;
-        //             state.actions.render();
-        //             outputDiv.scrollTop = outputDiv.scrollHeight;
-        //         }
-        //     }
-        // } catch (err) {
+        // catch (err) {
         //     await state.port.close();
         //     state.port = null;
         //     state.actions.render();
