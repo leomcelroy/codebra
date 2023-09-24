@@ -1,6 +1,6 @@
 # Codebra
 
-![Screenshot 2023-09-22 at 8 42 41 PM](https://github.com/leomcelroy/codebra/assets/27078897/289854b6-c5a9-401c-adaa-94937046f616)
+![Screenshot 2023-09-23 at 10 06 20 PM](https://github.com/leomcelroy/codebra/assets/27078897/e2b12ef8-68e1-4021-a13d-a1d48d84a915)
 
 Codebra is a micropython web-editor/[repl](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html). I had rp2040s in mind but it should work for other boards.
 
