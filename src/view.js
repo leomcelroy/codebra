@@ -10,11 +10,11 @@ export const view = (state) => {
         <div class="toolbar">
             <div class="menu-item upload-trigger">upload (shift+enter)</div>
             <div class="menu-separator">o</div>
-            <div class="menu-item connect-trigger">connect${state.port === null ? "" : "-ed"}</div>
+            <div class="menu-item connect-trigger">${state.port === null ? "" : "dis-"}connect</div>
             <div class="menu-separator">o</div>
             <div class="menu-item download-trigger">download</div>
-            <div class="menu-separator">o</div>
-            <a class="menu-item" href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">uf2</a>
+            <!-- <div class="menu-separator">o</div> -->
+            <!-- <a class="menu-item" href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">uf2</a> -->
             <div class="menu-separator">o</div>
             <a class="menu-item" href="https://github.com/leomcelroy/codebra">github</a>
         </div>

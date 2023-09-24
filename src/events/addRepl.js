@@ -5,7 +5,7 @@ export function addRepl(state) {
   const inputField = document.querySelector(".repl-input");
 
   inputField.addEventListener('keydown', async (event) => {
-      const { writer } = state;
+      const { port } = state;
 
       if (event.key === 'Enter') {
         const val = inputField.value;
@@ -13,7 +13,7 @@ export function addRepl(state) {
         const encoder = new TextEncoder();
         const data = encoder.encode(val + '\r\n');
 
-        await writer.write(data);
+        await port.write(data);
         inputField.value = '';
       }
   });

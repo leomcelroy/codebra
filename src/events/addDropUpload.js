@@ -28,7 +28,6 @@ export function addDropUpload(state) {
 function upload(files, state) {
   const cmEl = document.querySelector("cm-editor");
   const cm = cmEl.codemirror;
-  console.log({ cmEl, cm });
 
   const file = files[0];
   const fileName = file.name.split(".");

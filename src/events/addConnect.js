@@ -1,23 +1,28 @@
 import { createListener } from "../createListener.js";
+import { createWebSerialBuffer } from "../createWebSerialBuffer.js";
 
 export function addConnect(state) {
     const listen = createListener(document.body);
 
+    readLoop();
+
     listen("click", ".connect-trigger", async (e) => {
+        if (state.port !== null) {
+            await state.port.close();
+            state.port = null;
+            state.actions.render();
+            return;
+        }
+
         const port = await navigator.serial.requestPort();
         attemptConnect(port);
     });
 
     async function attemptConnect(port) {
+        console.log("attempt to connect to port", port);
         try {
-            await port.open({ baudRate: 115200 });
-
-            state.writer = port.writable.getWriter();
-            state.reader = port.readable.getReader();
-
-            readLoop();
-
-            state.port = port;
+            state.port = await createWebSerialBuffer(port);
+            state.logs = "";
             state.logs += `Connected to MicroPython REPL.\n`
             state.logs += `Type your commands or run a program!\n`
             state.logs += `\n>>> `
@@ -26,45 +31,62 @@ export function addConnect(state) {
         } catch (error) {
             console.error("There was an error connecting to the device:", error);
         }
+
+
     }
 
 
     const outputDiv = document.querySelector(".log-output");
 
-    async function readLoop() {
-        try {
-            while (true) {
-                const { reader } = state;
-                const { value, done } = await reader.read();
-                if (value) {
-                    const log = new TextDecoder().decode(value);
+    function readLoop() {
+        setInterval(() => {
+            if (state.port === null) return;
+
+            while (state.port.available()) {
+                const byte = state.port.read();
+                if (byte) {
+                    const log = String.fromCharCode(byte);
                     state.logs += log;
                     state.actions.render();
                     outputDiv.scrollTop = outputDiv.scrollHeight;
                 }
-                if (done) {
-                    reader.releaseLock();
-                    break;
-                }
             }
-        } catch (err) {
-            state.port = null;
-            state.actions.render();
-        }
+        }, 0);
+
+        // try {
+        //     while (true) {
+        //         const byte = state.port.read();
+        //         if (byte) {
+        //             const log = new TextDecoder().decode(byte);
+        //             state.logs += log;
+        //             state.actions.render();
+        //             outputDiv.scrollTop = outputDiv.scrollHeight;
+        //         }
+        //     }
+        // } catch (err) {
+        //     await state.port.close();
+        //     state.port = null;
+        //     state.actions.render();
+        // }
         
     }
 
-    async function automaticallyConnect() {
+    async function automaticallyConnect() { 
+        if (state.port) await state.port.close();
+        state.port = null;
+        
         const ports = await navigator.serial.getPorts()
 
         ports.forEach(async port => {
           const info = port.getInfo()
 
           if (info.usbVendorId === 11914) {
-            attemptConnect(port);
+            await attemptConnect(port);
           }
         })
       }
+
+      state.actions.autoconnect = automaticallyConnect;
 
       automaticallyConnect();
 

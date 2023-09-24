@@ -30,12 +30,12 @@ export function addUpload(state) {
     })
 
     async function uploadStringToFile(content, filename) {
-      const { writer, reader } = state;
+      const { port } = state;
 
       async function writeMsg(str, ms = 100) {
         const encoder = new TextEncoder();
         const data = encoder.encode(str); // Escape double quotes and write each line
-        await writer.write(data);
+        await port.write(data);
         await new Promise(resolve => setTimeout(resolve, ms));
       }
 
@@ -53,9 +53,14 @@ export function addUpload(state) {
 
       await writeMsg(toWrite, 2000);
 
-      await writeMsg(`import os\r\n`);
-      await writeMsg(`print(os.listdir())\r\n\r\n\r\n`);
-      await writeMsg(`with open("main.py", "r") as f:`);
-      await writeMsg(`  print(f.read())\r\n\r\n\r\n`);
+      // await writeMsg(`import os\r\n`);
+      // await writeMsg(`print(os.listdir())\r\n\r\n\r\n`);
+      // await writeMsg(`with open("main.py", "r") as f:`);
+      // await writeMsg(`  print(f.read())\r\n\r\n\r\n`);
+
+      await writeMsg(`import machine\r\n`);
+      await writeMsg(`machine.reset()\r\n`, 2000);
+      
+      state.actions.autoconnect();
   }
 }
