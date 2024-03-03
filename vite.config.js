@@ -1,3 +1,6 @@
 export default { 
-  base: `/codebra/`
+  base: `/codebra/`,
+  build: {
+    minify: false,
+  },
 }

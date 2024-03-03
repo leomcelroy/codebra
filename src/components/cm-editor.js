@@ -1,8 +1,12 @@
 import { EditorView, basicSetup } from "codemirror"
-import { keymap } from "@codemirror/view";
-import { python } from "@codemirror/lang-python"
+import { keymap, highlightSpecialChars } from "@codemirror/view";
+
+import { python } from "@codemirror/lang-python";
+import { html as langHTML } from "@codemirror/lang-html"
+import { javascript } from "@codemirror/lang-javascript";
+
 import { EditorState, StateField } from "@codemirror/state";
-import { syntaxTree, indentUnit } from "@codemirror/language";
+import { syntaxTree, indentUnit, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 
 import { createComponent, html } from "../createComponent.js";
@@ -12,7 +16,8 @@ export function initCodeMirror(el) {
   const keybindings = keymap.of([indentWithTab]);
   const extensions = [
     python(),
-    basicSetup, 
+    // highlightSpecialChars(),
+    syntaxHighlighting(defaultHighlightStyle, { fallback: true }), 
     keybindings,
     indentUnit.of("  "),
   ]

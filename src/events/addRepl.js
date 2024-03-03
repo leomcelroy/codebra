@@ -2,19 +2,26 @@
 
 export function addRepl(state) {
 
-  const inputField = document.querySelector(".repl-input");
+  document.body.addEventListener('keydown', async (event) => {
 
-  inputField.addEventListener('keydown', async (event) => {
-      const { port } = state;
+    const focusedEl = document.activeElement;
 
-      if (event.key === 'Enter') {
-        const val = inputField.value;
+    if (!focusedEl.matches(".repl-input")) return;
 
-        const encoder = new TextEncoder();
-        const data = encoder.encode(val + '\r\n');
+    const { port } = state;
 
-        await port.write(data);
-        inputField.value = '';
-      }
+    if (event.key === 'Enter') {
+      const val = focusedEl.value;
+
+      const encoder = new TextEncoder();
+      const data = encoder.encode(val + '\r\n');
+
+      await port.write(data);
+      focusedEl.value = '';
+
+      console.log(state);
+    }
+
+    
   });
 }

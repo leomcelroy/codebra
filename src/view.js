@@ -13,6 +13,10 @@ export const view = (state) => {
             <div class="menu-item connect-trigger">${state.port === null ? "" : "dis-"}connect</div>
             <div class="menu-separator">o</div>
             <div class="menu-item download-trigger">download</div>
+
+            <div class="menu-separator">o</div>
+            <div class="menu-item print-files">print files</div>
+
             <!-- <div class="menu-separator">o</div> -->
             <!-- <a class="menu-item" href="https://micropython.org/resources/firmware/RPI_PICO-20230426-v1.20.0.uf2">uf2</a> -->
             <div class="menu-separator">o</div>
@@ -29,7 +33,10 @@ export const view = (state) => {
 
           <div class="right-side">
             <div class="log-output">
-              <pre>${state.logs}<input placeholder="" class="repl-input"/></pre>
+              ${state.uploading 
+                ? html`<pre>Loading program...</pre>`
+                : html`<pre>${state.logs}<input placeholder="" class="repl-input"/></pre>`
+              }
             </div>
           </div>
 

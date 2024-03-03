@@ -12,10 +12,13 @@ import { addRepl } from "./events/addRepl.js";
 export function init(state) {
 	
 	state.actions = {
-		render: () => render(view(state), document.body)
+		render: (hard = false) => {
+			if (hard) render(view(state), document.body);
+			else window.requestAnimationFrame(() => render(view(state), document.body));
+		}
 	}
 
-	state.actions.render();
+	state.actions.render(true);
 
 	addCaching(state);
 	addWindowResize(state);
