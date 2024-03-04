@@ -1,5 +1,4 @@
 
-
 export function addRepl(state) {
 
   document.body.addEventListener('keydown', async (event) => {
@@ -8,18 +7,20 @@ export function addRepl(state) {
 
     if (!focusedEl.matches(".repl-input")) return;
 
-    const { port } = state;
+    const { port, repl } = state;
 
     if (event.key === 'Enter') {
       const val = focusedEl.value;
+      const result = await repl.write(val);
+      
+      console.log(result);
 
-      const encoder = new TextEncoder();
-      const data = encoder.encode(val + '\r\n');
+      // const outputDiv = document.querySelector(".log-output");
+      // state.logs += log;
+      // state.actions.render();
+      // outputDiv.scrollTop = outputDiv.scrollHeight;
 
-      await port.write(data);
       focusedEl.value = '';
-
-      console.log(state);
     }
 
     

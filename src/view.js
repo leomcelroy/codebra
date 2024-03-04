@@ -24,7 +24,17 @@ export const view = (state) => {
         </div>
 
         <div class="bottom">
-          <div class="left-side">
+
+          <div style="height:100%; width: 300px; border-right: 1px solid grey;">
+            <div style="height: 50%; background: antiquewhite;">
+              <div style="width: 100%; padding: .5rem 0px; text-align: center;">Files</div>
+            </div>
+            <div style="height: 50%; background: beige; border-top: 1px solid grey;">
+              <div style="width: 100%; padding: .5rem 0px; text-align: center;">Devices</div>
+            </div>
+          </div>
+
+          <div class="left-side" style="border-right: 1px solid grey;">
             <div class="editor-container">
               <cm-editor></cm-editor>
             </div>
@@ -40,7 +50,7 @@ export const view = (state) => {
             </div>
           </div>
 
-          <div class="separator"></div>
+          <!-- <div class="separator"></div> -->
         </div>
 
         <div class="drop-modal hidden"></div>
