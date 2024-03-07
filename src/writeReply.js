@@ -54,10 +54,19 @@ export async function initRepl(port) {
       port.flush();
     },
     async reboot() {
-      await writeMsg(`import machine\r\n`);
-      await writeMsg(`machine.reset()\r\n`);
+      const msg = unindent`
+        import machine
+
+        machine.reset()
+          
+      `
+
+      await write(msg);
+
       await sleep(150);
       GLOBAL_STATE.actions.autoconnect();
+
+      await reset();
     },
     async getfiles() {
       const msg = unindent`
@@ -84,6 +93,8 @@ export async function initRepl(port) {
         f = open("${filename}", "w")
         f.write('''${content}''')
         f.close()
+
+        print("File deleted.")
       `
 
       const result = await write(msg);
@@ -101,8 +112,27 @@ export async function initRepl(port) {
 
       return result;
     },
-    async deleteFile() {
+    async deleteFile(filename) {
+      const msg = unindent`
+        import os
 
+        def delete_file(filename):
+            try:
+                if filename in os.listdir():
+                    os.remove(filename)
+                    print(f"File '{filename}' has been deleted.")
+                else:
+                    print(f"File '{filename}' does not exist.")
+            except OSError as e:
+                print(f"Error deleting file: {e}")
+
+        delete_file("${filename}")
+
+      `
+
+      const result = await write(msg);
+
+      return result;
     }
   }
 }
