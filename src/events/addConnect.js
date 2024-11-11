@@ -5,11 +5,12 @@ import { initRepl } from "../writeReply.js";
 export function addConnect(state) {
     const listen = createListener(document.body);
 
-    listen("click", ".print-files", async e => {
-
-      const files = await state.repl.getFiles();
-
-    })
+    listen("click", ".print-files", async (e) => {
+        const fileNames = await state.repl.getFileNames();
+        console.log(fileNames);
+        const files = await state.repl.getFiles();
+        console.log(files);
+    });
 
     listen("click", ".connect-trigger", async (e) => {
         if (state.port !== null) {
@@ -26,44 +27,39 @@ export function addConnect(state) {
     async function attemptConnect(port) {
         console.log("attempt to connect to port", port);
         try {
-          state.port = await createWebSerialBuffer(port);
-          state.repl = await initRepl(state.port);
+            state.port = await createWebSerialBuffer(port);
+            state.repl = await initRepl(state.port);
 
-          state.logs = "";
-          state.logs += `Connected to MicroPython REPL.\n`
-          state.logs += `Type your commands or run a program!\n`
-          state.logs += `\n>>> `
+            state.logs = "";
+            state.logs += `Connected to MicroPython REPL.\n`;
+            state.logs += `Type your commands or run a program!\n`;
+            state.logs += `\n>>> `;
 
-          state.actions.render();
-
+            state.actions.render();
         } catch (error) {
-            console.error("There was an error connecting to the device:", error);
+            console.error(
+                "There was an error connecting to the device:",
+                error,
+            );
         }
-
-
     }
 
-    async function automaticallyConnect() { 
+    async function automaticallyConnect() {
         if (state.port) await state.port.close();
         state.port = null;
-        
-        const ports = await navigator.serial.getPorts()
 
-        ports.forEach(async port => {
-          const info = port.getInfo()
+        const ports = await navigator.serial.getPorts();
 
-          if (info.usbVendorId === 11914) {
-            await attemptConnect(port);
-          }
-        })
-      }
+        ports.forEach(async (port) => {
+            const info = port.getInfo();
 
-      state.actions.autoconnect = automaticallyConnect;
+            if (info.usbVendorId === 11914) {
+                await attemptConnect(port);
+            }
+        });
+    }
 
-      automaticallyConnect();
+    state.actions.autoconnect = automaticallyConnect;
 
+    automaticallyConnect();
 }
-
-
-
-

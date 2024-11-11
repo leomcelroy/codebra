@@ -6,28 +6,22 @@ async function sleep(ms) {
 }
 
 export async function initRepl(port) {
-
-  await reset();
+  const startMsg = await reset();
+  console.log({ startMsg });
 
   async function writeMsg(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str); // Escape double quotes and write each line
-    await port.write(data);
+    const newPromise = await port.write(data);
   }
 
-  async function reset() {
-    await writeMsg("\x01"); // raw mode
-    await sleep(150);
-    port.flush();
-  }
-
-  async function write(content) {
+  async function write(content, maxWaitMs = 2000) {
     await writeMsg(content);
     await writeMsg("\x04");
 
-    const reply = await port.readUntil("\x04");
-    const error = await port.readUntil("\x04");
-    port.flush();
+    const reply = await port.readUntil("\x04", maxWaitMs);
+    const error = await port.readUntil("\x04", maxWaitMs);
+    const flushed = port.flush();
 
     let replyString = "";
     let errorString = "";
@@ -41,34 +35,50 @@ export async function initRepl(port) {
     }
 
     // trim "OK" from start, trim "\x04" from end
-    return { reply: replyString.slice(2, -1), error: errorString.slice(2, -2) };
-  
+    return {
+      reply: replyString.slice(2, -1),
+      error: errorString.slice(0, -1),
+    };
+  }
+
+  async function reset() {
+    await writeMsg("\x01"); // raw mode
+    await sleep(150);
+    const flushed = port.flush();
+
+    return flushed;
   }
 
   return {
     write,
     reset,
+    async reboot() {
+      await writeMsg("\x02"); // exit
+      const msg = `import machine\r\n` + `machine.reset()\r\n`;
+
+      await writeMsg(msg);
+      await sleep(2000);
+      GLOBAL_STATE.actions.autoconnect();
+    },
     async close() {
-      await writeMsg('\x02');
+      await writeMsg("\x02");
       await sleep(150);
       port.flush();
     },
-    async reboot() {
+    async getFileNames() {
       const msg = unindent`
-        import machine
+        import os
+        import json
 
-        machine.reset()
-          
-      `
+        print(json.dumps(os.listdir()))
+      `;
 
-      await write(msg);
+      const result = await write(msg);
+      const files = JSON.parse(result.reply);
 
-      await sleep(150);
-      GLOBAL_STATE.actions.autoconnect();
-
-      await reset();
+      return files;
     },
-    async getfiles() {
+    async getFiles() {
       const msg = unindent`
         import os
         import json
@@ -81,23 +91,22 @@ export async function initRepl(port) {
 
         print(json.dumps(files))
           
-      `
+      `;
 
       const result = await write(msg);
       const files = JSON.parse(result.reply);
-      
+
       return files;
     },
     async writeFile(filename, content) {
-      const msg = unindent`
-        f = open("${filename}", "w")
-        f.write('''${content}''')
-        f.close()
-
-        print("File deleted.")
-      `
+      const msg =
+        `f = open("${filename}", "w")\n` +
+        `f.write('''${content}''')\n` +
+        `f.close()`;
 
       const result = await write(msg);
+
+      await writeMsg("\x04"); // compile execute
 
       return result;
     },
@@ -106,8 +115,8 @@ export async function initRepl(port) {
         f = open("${filename}", "r")
         text = f.read()
         print(text)
-      `
-      
+      `;
+
       const result = await write(msg);
 
       return result;
@@ -128,11 +137,11 @@ export async function initRepl(port) {
 
         delete_file("${filename}")
 
-      `
+      `;
 
       const result = await write(msg);
 
       return result;
-    }
-  }
+    },
+  };
 }

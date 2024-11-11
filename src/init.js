@@ -1,5 +1,5 @@
 import { render } from "lit-html";
-import { view } from "./view.js"
+import { view } from "./view.js";
 
 import { addCaching } from "./events/addCaching.js";
 import { addWindowResize } from "./events/addWindowResize.js";
@@ -10,13 +10,15 @@ import { addConnect } from "./events/addConnect.js";
 import { addRepl } from "./events/addRepl.js";
 
 export function init(state) {
-	
+	window.state = state;
+
 	state.actions = {
 		render: (hard = false) => {
 			if (hard) render(view(state), document.body);
-			else window.requestAnimationFrame(() => render(view(state), document.body));
-		}
-	}
+			else
+				window.requestAnimationFrame(() => render(view(state), document.body));
+		},
+	};
 
 	state.actions.render(true);
 
@@ -35,5 +37,4 @@ export function init(state) {
 	// });
 
 	// observer.observe(canvas);
-
 }

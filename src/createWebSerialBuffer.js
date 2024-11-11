@@ -1,18 +1,18 @@
 export async function createWebSerialBuffer(port, baudrate = 115200) {
   const buffer = [];
 
-  await port.open({ baudRate: baudrate })
+  await port.open({ baudRate: baudrate });
 
-  let reader = null
-  let writer = null
+  let reader = null;
+  let writer = null;
 
   async function stuffBuffer() {
     try {
       while (port.readable) {
-        reader = port.readable.getReader()
+        reader = port.readable.getReader();
 
         while (true) {
-          const { value, done } = await reader.read()
+          const { value, done } = await reader.read();
 
           if (value) {
             for (let i = 0; i < value.length; i++) {
@@ -22,20 +22,25 @@ export async function createWebSerialBuffer(port, baudrate = 115200) {
           }
 
           if (done) {
-            reader.releaseLock()
-            reader = null
-            break
+            reader.releaseLock();
+            reader = null;
+            break;
           }
         }
       }
     } catch (err) {
-      console.error(err)
+      console.log("Buffer stuffing error.");
+      console.error(err);
     } finally {
       // await port.close();
     }
   }
 
-  stuffBuffer()
+  stuffBuffer();
+
+  port.ondisconnect = (e) => {
+    console.log("disconnected");
+  };
 
   async function write(msg) {
     writer = port.writable.getWriter();
@@ -47,11 +52,14 @@ export async function createWebSerialBuffer(port, baudrate = 115200) {
   return {
     write,
     flush: () => {
+      let flushed = "";
       while (buffer.length > 0) {
-        buffer.pop();
+        const byte = buffer.pop();
+        const char = String.fromCharCode(byte);
+        flushed = char + flushed;
       }
 
-      return;
+      return flushed;
     },
     read: () => {
       if (buffer.length === 0) return null;
@@ -59,7 +67,6 @@ export async function createWebSerialBuffer(port, baudrate = 115200) {
       return buffer.shift();
     },
     readUntil: async (targetByte, maxDuration = 2000) => {
-
       let result = [];
       targetByte = targetByte.charCodeAt(0);
 
@@ -70,7 +77,7 @@ export async function createWebSerialBuffer(port, baudrate = 115200) {
             clearInterval(interval);
             console.warn("Timeout reached before condition was met");
             resolve(result);
-          } 
+          }
 
           if (buffer.length === 0) {
             return;
@@ -97,18 +104,18 @@ export async function createWebSerialBuffer(port, baudrate = 115200) {
     available: () => buffer.length > 0,
     close: async () => {
       if (reader) {
-        reader.releaseLock()
+        reader.releaseLock();
       }
 
       if (writer) {
-        writer.releaseLock()
+        writer.releaseLock();
       }
 
-      await port.close()
+      await port.close();
 
-      return
-    }
-  }
+      return;
+    },
+  };
 }
 
 async function sleep(ms) {
